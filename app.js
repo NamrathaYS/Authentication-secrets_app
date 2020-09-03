@@ -1,9 +1,10 @@
 //jshint esversion:6
-
+require('dotenv').config();
 const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption")
 
 const app = express();
 app.use(express.static("public"));
@@ -21,6 +22,9 @@ const userSchema = new mongoose.Schema({
   password: String
 });
 
+
+userSchema.plugin(encrypt, { secret: process.env.secret , encryptedFields: ['password'] } );
+
 const User = new mongoose.model("User", userSchema)
 
 app.get("/", function(req,res){
@@ -37,7 +41,7 @@ app.route("/register")
     email: req.body.username,
     password: req.body.password
   });
- //!!IMPORTANT: Saving the user data in the database and rendering the secrets.ejs page
+ //!!IMPORTANT LEVE-1: Saving the user data in the database and rendering the secrets.ejs page
   newUser.save(function(err){
     if(err){
       console.log(er);
@@ -59,9 +63,10 @@ app.route("/login")
     if(err){
       console.log(err);
     }else{
-      //!!IMPORTANT: DOING THE CHECK
+      //!!IMPORTANT LEVEL 1: DOING THE CHECK
       if(foundUser){
         if(foundUser.password === password){
+          console.log(foundUser.password);
           res.render("secrets");
         }
       }
